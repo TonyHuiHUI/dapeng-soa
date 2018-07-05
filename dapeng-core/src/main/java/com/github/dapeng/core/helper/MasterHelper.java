@@ -4,11 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by tangliu on 2016/7/13.
+ *
+ * @author tangliu
+ * @date 2016/7/13
  */
 public class MasterHelper {
 
-    public static Map<String, Boolean> isMaster = new HashMap<>();
+    public static Map<String, Boolean> isMaster = new HashMap<>(128);
 
     /**
      * 根据serviceName, versionName，判断当前服务是否集群中的master

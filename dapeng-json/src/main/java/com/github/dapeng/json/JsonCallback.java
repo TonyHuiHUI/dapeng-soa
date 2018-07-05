@@ -2,8 +2,15 @@ package com.github.dapeng.json;
 
 import com.github.dapeng.org.apache.thrift.TException;
 
+/**
+ * @author ever
+ */
 public interface JsonCallback {
 
+    /**
+     *
+     * @throws TException
+     */
     void onStartObject() throws TException;
     void onEndObject() throws TException;
 
