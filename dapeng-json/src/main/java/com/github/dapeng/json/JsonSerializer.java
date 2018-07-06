@@ -35,6 +35,55 @@ public class JsonSerializer implements BeanSerializer<String> {
         this.version = version;
     }
 
+    @Override
+    public String read(TProtocol iproto) throws TException {
+
+        JsonWriter writer = new JsonWriter();
+        read(iproto, writer);
+        return writer.toString();
+    }
+
+    /**
+     * {
+     * header:{
+     * <p>
+     * },
+     * boday:{
+     * ${struct.name}:{
+     * <p>
+     * }
+     * }
+     * }
+     *
+     * @param input
+     * @param oproto
+     * @throws TException
+     */
+    @Override
+    public void write(String input, TProtocol oproto) throws TException {
+        JsonReader jsonReader = new JsonReader(service, method, version, struct, requestByteBuf, oproto);
+        try {
+            new JsonParser(input, jsonReader).parseJsValue();
+        } catch (RuntimeException e) {
+            if (jsonReader.current != null) {
+                String errorMsg = "Please check field:" + jsonReader.current.fieldName;
+                logger.error(errorMsg + "\n" + e.getMessage(), e);
+                throw new TException(errorMsg);
+            }
+            throw e;
+        }
+    }
+
+    @Override
+    public void validate(String s) throws TException {
+
+    }
+
+    @Override
+    public String toString(String s) {
+        return s;
+    }
+
     // thrift -> json
     private void read(TProtocol iproto, JsonCallback writer) throws TException {
         iproto.readStructBegin();
@@ -216,57 +265,6 @@ public class JsonSerializer implements BeanSerializer<String> {
             writer.onEndField();
         }
 
-    }
-
-    @Override
-    public String read(TProtocol iproto) throws TException {
-
-        JsonWriter writer = new JsonWriter();
-        read(iproto, writer);
-        return writer.toString();
-    }
-
-    // json -> thrift
-
-    /**
-     * {
-     * header:{
-     * <p>
-     * },
-     * boday:{
-     * ${struct.name}:{
-     * <p>
-     * }
-     * }
-     * }
-     *
-     * @param input
-     * @param oproto
-     * @throws TException
-     */
-    @Override
-    public void write(String input, TProtocol oproto) throws TException {
-        JsonReader jsonReader = new JsonReader(service, method, version, struct, requestByteBuf, oproto);
-        try {
-            new JsonParser(input, jsonReader).parseJsValue();
-        } catch (RuntimeException e) {
-            if (jsonReader.current != null) {
-                String errorMsg = "Please check field:" + jsonReader.current.fieldName;
-                logger.error(errorMsg + "\n" + e.getMessage(), e);
-                throw new TException(errorMsg);
-            }
-            throw e;
-        }
-    }
-
-    @Override
-    public void validate(String s) throws TException {
-
-    }
-
-    @Override
-    public String toString(String s) {
-        return s;
     }
 
     public void setRequestByteBuf(ByteBuf requestByteBuf) {
